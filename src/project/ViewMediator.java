@@ -23,4 +23,12 @@ public class ViewMediator extends Observable {
 		
 	}
 	
+	void clearJob() {
+		
+	}
+	
+	void makeReady(String s) {
+		
+	}
+	
 }
