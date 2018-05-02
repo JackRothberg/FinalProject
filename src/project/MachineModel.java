@@ -346,6 +346,14 @@ public class MachineModel {
 		}
 	}
 	
+	public String getHex(int i) {
+		return memory.getHex(i);
+	}
+	
+	public String getDecimal(int i) {
+		return memory.getDecimal(i);
+	}
+	
 	private class CPU{
 		private int accumulator;
 		private int instructionPointer;
