@@ -3,6 +3,7 @@ package project;
 public class Memory {
 	public static final int DATA_SIZE = 2048;
 	private int[] data = new int[DATA_SIZE];
+	private int changedIndex = -1;
 	int[] getDataArray(){
 		return data;
 	}
@@ -11,6 +12,7 @@ public class Memory {
 	}
 	public void setData(int index, int value){
 		data[index] = value;
+		changedIndex = index;
 	}
 	
 	public static final int CODE_MAX = 2048;
@@ -25,7 +27,7 @@ public class Memory {
 	public int getArg(int i) {		
 		return code[2*i + 1];
 	}
-	public void clear(int start, int end) {
+	public void clearCode(int start, int end) {
 		for(int i = start; i < end; i++) {
 			code[2*i]=0;
 			code[2*i+1]=0;
@@ -34,6 +36,15 @@ public class Memory {
 	public void setCode(int index, int op, int arg) {
 		code[2*index] = op;
 		code[2*index+1] = arg;
+	}
+	public int getChangedIndex() {
+		return changedIndex;
+	}
+	public void clearData(int start, int end) {
+		for(int i = 0; i<= start && i < end;i++) {
+			data[i] = 0;
+		}
+		changedIndex = -1;
 	}
 	
 }
