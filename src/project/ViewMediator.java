@@ -173,6 +173,10 @@ public class ViewMediator extends Observable {
 		filesManager.loadFile(model.getCurrentJob());;
 	}
 	
+	public void assembleFile() {
+		filesManager.assemblefile();
+	}
+	
 	public void setPeriod(int value) {
 		animator.setPeriod(value);
 	}
