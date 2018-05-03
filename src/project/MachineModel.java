@@ -1,19 +1,8 @@
 package project;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridLayout;
 import java.util.Map;
-import java.util.TreeMap;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
+import java.util.TreeMap;
 
 import projectview.States;
 
@@ -72,7 +61,7 @@ public class MachineModel {
 		});
 		//INSTRUCTION_MAP entry for "JUMPI"
 		INSTRUCTIONS.put(0x8, arg -> {
-			cpu.instructionPointer = currentJob.getStartcodeIndex() + arg;
+			cpu.instructionPointer = arg;
 		});
 		//INSTRUCTION_MAP entry for "JMPZR"
 		INSTRUCTIONS.put(0x9, arg -> {
@@ -96,7 +85,7 @@ public class MachineModel {
 		//INSTRUCTION_MAP entry for "JMPZI"
 		INSTRUCTIONS.put(0xB, arg -> {
 			if(cpu.accumulator == 0) {
-				cpu.instructionPointer = currentJob.getStartcodeIndex() + arg;
+				cpu.instructionPointer = arg;
 			}
 			else {
 				cpu.incrementIP(1);
@@ -222,15 +211,16 @@ public class MachineModel {
         	else if(cpu.accumulator == 0) {
         		cpu.accumulator = 1;
         	}
+        	cpu.incrementIP(1);
         });
         //INSTRUCTION_MAP entry for "CMPL"
         INSTRUCTIONS.put(0x1B, arg -> {
         	int val = memory.getData(cpu.memoryBase + arg);
         	if(val < 0) {
-        		cpu.accumulator = 0;
+        		cpu.accumulator = 1;
         	}
         	else {
-        		cpu.accumulator = 1;
+        		cpu.accumulator = 0;
         	}
         	cpu.incrementIP(1);
         });
@@ -249,6 +239,11 @@ public class MachineModel {
         INSTRUCTIONS.put(0x1F, arg -> {
         	callback.halt();			
         });
+      //INSTRUCTION_MAP entry for "JUMPN"
+        INSTRUCTIONS.put(0x1D, arg -> {
+        	int arg1 = memory.getData(cpu.memoryBase+arg);
+        	cpu.instructionPointer = currentJob.getStartcodeIndex() + arg1;
+        });
         jobs[0] = new Job();
         jobs[1] = new Job();
         currentJob = jobs[0];
@@ -258,18 +253,22 @@ public class MachineModel {
         jobs[1].setStartmemoryIndex(Memory.DATA_SIZE/2);
         jobs[0].setCurrentState(States.NOTHING_LOADED);
         jobs[1].setCurrentState(States.NOTHING_LOADED);
+        
 	}
-	public MachineModel() {
-		this(false, null);
-	}
+	
 	public int getChangedIndex() {
 		return memory.getChangedIndex();
 	}
+	
+	public MachineModel() {
+		this(false, null);
+	}
+	
 	public int getData(int index) {
 		return memory.getData(index);
 	}
-	public int[] getDataArray() {
-		return memory.getDataArray();
+	public int[] getData() {
+		return memory.getData();
 	}
 	public void setData(int index, int value) {
 		memory.setData(index, value);
@@ -295,7 +294,6 @@ public class MachineModel {
 	public Instruction get(int index) {
 		 return INSTRUCTIONS.get(index);
 	 }
-	
 	public int[] getCode() {
 		return memory.getCode();
 	}
@@ -311,6 +309,7 @@ public class MachineModel {
 	public void setCode(int index, int op, int arg) {
 		memory.setCode(index, op, arg);
 	}
+	
 	public Job getCurrentJob() {
 		return currentJob;
 	}
@@ -357,7 +356,6 @@ public class MachineModel {
 			cpu.memoryBase = currentJob.getStartmemoryIndex();
 		}
 	}
-	
 	public String getHex(int i) {
 		return memory.getHex(i);
 	}
@@ -365,7 +363,6 @@ public class MachineModel {
 	public String getDecimal(int i) {
 		return memory.getDecimal(i);
 	}
-	
 	private class CPU{
 		private int accumulator;
 		private int instructionPointer;

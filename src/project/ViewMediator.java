@@ -13,6 +13,7 @@ import project.MachineModel;
 import project.Memory;
 
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 public class ViewMediator extends Observable {
@@ -21,9 +22,9 @@ public class ViewMediator extends Observable {
 	private MemoryViewPanel memoryViewPanel1;
 	private MemoryViewPanel memoryViewPanel2;
 	private MemoryViewPanel memoryViewPanel3;
-	//private ControlPanel controlPanel;
-	//private ProcessorViewPanel processorPanel;
-	//private MenuBarBuilder menuBuilder;
+	private ControlPanel controlPanel;
+	private ProcessorViewPanel processorPanel;
+	private MenuBarBuilder menuBuilder;
 	private JFrame frame;
 	private FilesManager filesManager;
 	private Animator animator;
@@ -166,7 +167,7 @@ public class ViewMediator extends Observable {
 	public void reload() {
 		animator.setAutoStepOn(false);
 		clearJob();
-		filesManager.finalLoad_ReloadStep(model.getCurrentJob());
+		filesManager.loadFile(model.getCurrentJob());
 	}
 	
 	public void loadFile() {
@@ -174,9 +175,8 @@ public class ViewMediator extends Observable {
 	}
 	
 	public void assembleFile() {
-		filesManager.assemblefile();
+		filesManager.assembleFile();
 	}
-	
 	public void setPeriod(int value) {
 		animator.setPeriod(value);
 	}
@@ -199,9 +199,9 @@ public class ViewMediator extends Observable {
 		memoryViewPanel1 = new MemoryViewPanel(this, model, 0, 240);
 		memoryViewPanel2 = new MemoryViewPanel(this, model, 240, Memory.DATA_SIZE/2);
 		memoryViewPanel3 = new MemoryViewPanel(this, model, Memory.DATA_SIZE/2, Memory.DATA_SIZE);
-		//controlPanel = new ControlPanel(this);
-		//processorPanel = new ProcessorPanel(this, model);
-		//menuBuilder = new MenuBuilder(this);
+		controlPanel = new ControlPanel(this);
+		processorPanel = new ProcessorViewPanel(this, model);
+		menuBuilder = new MenuBarBuilder(this);
 		frame = new JFrame("Simulator");
 		
 		Container content = frame.getContentPane();
@@ -215,9 +215,26 @@ public class ViewMediator extends Observable {
 		center.add(memoryViewPanel2.createMemoryDisplay()); 
 		center.add(memoryViewPanel3.createMemoryDisplay());
 		frame.add(center);
+		
+		frame.add(controlPanel.createControlDisplay(),BorderLayout.PAGE_END);
+		
+		frame.add(processorPanel.createProcessorDisplay(),BorderLayout.PAGE_START);
+		
+		JMenuBar bar = new JMenuBar();
+		frame.setJMenuBar(bar);
+		bar.add(menuBuilder.createFileMenu());
+		bar.add(menuBuilder.createExecuteMenu());
+		bar.add(menuBuilder.createJobsMenu());
 		/** return here for other GUI components*/
 		
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(WindowListenerFactory.
+				windowClosingFactory(e -> exit()));
+		model.setCurrentState(States.NOTHING_LOADED);
+		animator.start();
+		model.getCurrentState().enter();
+		setChanged();
+		notifyObservers();
 		// return HERE for other setup details
 		frame.setVisible(true);
 	}
@@ -255,12 +272,13 @@ public class ViewMediator extends Observable {
 			public void run() {
 				ViewMediator mediator = new ViewMediator();
 				MachineModel model = new MachineModel(
-				//true,  
-				//() -> mediator.setCurrentState(States.PROGRAM_HALTED)
+						true,  
+						() -> mediator.setCurrentState(States.PROGRAM_HALTED)
 				);
 				mediator.setModel(model);
 				mediator.createAndShowGUI();;
 			}
 		});
 	}
+	
 }
