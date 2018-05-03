@@ -166,7 +166,11 @@ public class ViewMediator extends Observable {
 	public void reload() {
 		animator.setAutoStepOn(false);
 		clearJob();
-		filesManager.loadFile(model.getCurrentJob());
+		filesManager.finalLoad_ReloadStep(model.getCurrentJob());
+	}
+	
+	public void loadFile() {
+		filesManager.loadFile(model.getCurrentJob());;
 	}
 	
 	public void setPeriod(int value) {
