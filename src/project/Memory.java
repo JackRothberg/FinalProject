@@ -48,7 +48,7 @@ public class Memory {
 	}
 	
 	public String getHex(int i) {
-		return Integer.toHexString(code[2*i+1]).toUpperCase() +
+		return Integer.toHexString(code[2*i]).toUpperCase() +
 				" " + Integer.toHexString(code[2*i+1]).toUpperCase();
 	}
 	
